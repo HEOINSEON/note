@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배움 성장 기록장</title>
+    <!-- 구글 폰트: 칠판 느낌과 손글씨 느낌을 위한 폰트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --chalk-white: #ffffff;
+            --blackboard-green: #2e4d3d;
+            --note-blue: #a0c4ff;
+            --note-red: #ffadad;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Gaegu', cursive;
+        }
+
+        /* 칠판 배경 디자인 */
+        .blackboard {
+            width: 90%;
+            max-width: 600px;
+            background-color: var(--blackboard-green);
+            border: 15px solid #5d4037; /* 나무 프레임 */
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 50px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        h1 {
+            color: var(--chalk-white);
+            text-align: center;
+            font-size: 2.5rem;
+            margin-top: 0;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.2);
+            border-bottom: 2px dashed rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .instruction {
+            color: #ffd54f;
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            color: var(--chalk-white);
+            font-size: 1.3rem;
+        }
+
+        /* 노트 줄무늬 스타일 입력창 */
+        input[type="text"], 
+        textarea {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Nanum Pen Script', cursive;
+            font-size: 1.5rem;
+            background-color: #fdfdfd;
+            background-image: linear-gradient(var(--note-blue) 1px, transparent 1px);
+            background-size: 100% 1.8rem;
+            line-height: 1.8rem;
+            color: #333;
+            outline: none;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        input[type="text"] {
+            height: 3rem;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* 제출 버튼 (분필 느낌) */
+        button {
+            background-color: transparent;
+            color: var(--chalk-white);
+            border: 3px solid var(--chalk-white);
+            padding: 10px 20px;
+            font-size: 1.6rem;
+            font-family: 'Gaegu', cursive;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            border-radius: 50px 20px 50px 20px;
+        }
+
+        button:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: scale(1.02);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* 결과 메시지 박스 */
+        #message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+            font-size: 1.2rem;
+        }
+
+        .success { background-color: rgba(76, 175, 80, 0.8); color: white; }
+        .error { background-color: rgba(244, 67, 54, 0.8); color: white; }
+
+        /* 로딩 애니메이션 */
+        .loader {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blackboard">
+        <h1>📓 배움 성장 기록장</h1>
+        <p class="instruction">오늘 여러분의 소중한 생각을 들려주세요.</p>
+
+        <form id="recordForm">
+            <div class="input-group">
+                <label for="studentInfo">학번 및 이름</label>
+                <input type="text" id="studentInfo" name="studentInfo" placeholder="예: 10101 홍길동" required>
+            </div>
+
+            <div class="input-group">
+                <label for="learned">오늘 새롭게 알게 된 점</label>
+                <textarea id="learned" name="learned" placeholder="수업 중 인상 깊었던 내용을 적어보세요..." required></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="wondering">더 궁금한 점</label>
+                <textarea id="wondering" name="wondering" placeholder="더 알고 싶은 내용이나 질문을 남겨주세요..."></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span class="loader" id="loader"></span>
+                오늘의 배움 제출하기
+            </button>
+        </form>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        /**
+         * 선생님께서 보내주신 실제 URL로 업데이트 되었습니다.
+         */
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxZYO9pPqWDrEqr3Rj2dxqSevOu7YGQYF980cudXlZOHOrgqMawh4HTFGSLbLdAYP8mww/exec'; 
+
+        const form = document.getElementById('recordForm');
+        const btn = document.getElementById('submitBtn');
+        const loader = document.getElementById('loader');
+        const msg = document.getElementById('message');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            
+            // UI 상태 변경: 버튼 비활성화 및 로딩 표시
+            btn.disabled = true;
+            loader.style.display = 'inline-block';
+            msg.style.display = 'none';
+
+            // 데이터 준비
+            const formData = new FormData(form);
+
+            // 데이터 전송 (구글 시트로)
+            fetch(scriptURL, { 
+                method: 'POST', 
+                body: formData
+            })
+            .then(response => {
+                showMessage('훌륭해요! 기록이 안전하게 저장되었습니다. 👍', 'success');
+                form.reset();
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                showMessage('앗, 저장 중에 오류가 발생했어요. 다시 시도해볼까요?', 'error');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                loader.style.display = 'none';
+            });
+        });
+
+        function showMessage(text, type) {
+            msg.textContent = text;
+            msg.className = type;
+            msg.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
